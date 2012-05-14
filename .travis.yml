@@ -2,7 +2,7 @@ bundler_args:
   --without development debug darwin
 
 before_script:
-  - "bundle exec thin start -R spec/integration/server.ru -p 8888"
+  - "nohup bundle exec thin start -R spec/integration/server.ru -p 8888 &"
   - "sleep 2"
 
 env:

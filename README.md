@@ -1,4 +1,4 @@
-# rack-stream
+# rack-stream [![Build Status](https://secure.travis-ci.org/jch/rack-stream.png)](http://travis-ci.org/jch/rack-stream)
 
 ## Overview
 
