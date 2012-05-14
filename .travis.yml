@@ -1,0 +1,17 @@
+bundler_args:
+  --without development debug darwin
+
+before_script:
+  - "bundle exec thin start -R spec/integration/server.ru -p 8888"
+  - "sleep 2"
+
+env:
+ - SERVER=http://localhost:8888
+
+language: ruby
+
+script: "bundle exec rake spec:integration && bundle exec rake spec"
+
+rvm:
+  - 1.9.2
+  - 1.9.3
