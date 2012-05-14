@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require 'sinatra/synchrony'
 require 'rack/stream'
 
 use Rack::Stream
