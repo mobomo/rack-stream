@@ -5,7 +5,7 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - "sleep 3"
-  - "nohup bundle exec thin start -R spec/integration/server.ru -p 8888 &"
+  - "nohup bundle exec thin start -R spec/integration/sinatra.ru -p 8888 &"
   - "sleep 2"
 
 env:
