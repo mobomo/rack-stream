@@ -1,6 +1,10 @@
 module Rack
   class Stream
+    # A Handler is responsible for opening and closing connections
+    # to stream content.
     module Handlers
+      # @private
+      # TODO: allow registration of custom protocols
       def find(app)
         if Faye::WebSocket.websocket?(app.env)
           WebSocket.new(app)
@@ -12,24 +16,48 @@ module Rack
       end
       module_function :find
 
+      # All handlers should inherit from `AbstractHandler`
       class AbstractHandler
+
+        # @param app [Rack::Stream::App] reference to current request
         def initialize(app)
-          @app = app
+          @app  = app
+          @body = DeferrableBody.new
         end
 
+        # Enqueue content to be streamed at a later time.
+        #
+        # Optionally override this method if you need to control
+        # the content at a protocol level.
         def chunk(*chunks)
-          raise NotImplementedError
+          @body.chunk(*chunks)
         end
 
+        # @private
         def open!
+          open
+        end
+
+        # Implement `#open` to initiate a connection
+        def open
           raise NotImplementedError
         end
 
+        # @private
         def close!(flush = true)
+          close
+          @body.close!(flush)
+        end
+
+        # Implement `#close` for cleanup
+        # `#close` is called before the DeferrableBody is succeeded.
+        def close
           raise NotImplementedError
         end
       end
 
+      # This Handler works under EventMachine aware Rack servers like Thin
+      # and Rainbows! It does chunked transfer encoding.
       class Http < AbstractHandler
         TERM = "\r\n".freeze
         TAIL = "0#{TERM}#{TERM}".freeze
@@ -38,23 +66,22 @@ module Rack
           super
           @app.headers['Transfer-Encoding'] = 'chunked'
           @app.headers.delete('Content-Length')
-          @body = DeferrableBody.new  # swap this out for different body types
         end
 
         def chunk(*chunks)
-          @body.chunk(*chunks.map {|c| encode_chunk(c)})
+          super(*chunks.map {|c| encode_chunk(c)})
         end
 
-        def open!
+        def open
           @app.env['async.callback'].call [@app.status, @app.headers, @body]
         end
 
-        def close!(flush = true)
+        def close
           @body.chunk(TAIL)  # tail is special and already encoded
-          @body.close!(flush)
         end
 
         private
+
         def encode_chunk(c)
           return nil if c.nil?
 
@@ -65,32 +92,36 @@ module Rack
         end
       end
 
+      # This handler uses delegates WebSocket requests to faye-websocket
       class WebSocket < AbstractHandler
-        def chunk(*chunks)
-          # this is not called until after #open!, so @ws is always defined
-          chunks.each {|c| @ws.send(c)}
+        def close
+          @body.callback {
+            @ws.close(@app.status)
+          }
         end
 
-        def close!(flush = true)
-          @ws.close(@app.status)
-        end
-
-        def open!
+        def open
           @ws = Faye::WebSocket.new(@app.env)
+          @ws.onopen = lambda do |event|
+            @body.each {|c| @ws.send(c)}
+          end
         end
       end
 
-      class EventSource < WebSocket
-        def chunk(*chunks)
-          chunks.each {|c| @es.send(c)}
+      # This handler uses delegates EventSource requests to faye-websocket
+      class EventSource < AbstractHandler
+        # TODO: browser initiates connection again, isn't closed
+        def close
+          @body.callback {
+            @es.close
+          }
         end
 
-        def close!(flush = true)
-          @es.close
-        end
-
-        def open!
+        def open
           @es = Faye::EventSource.new(@app.env)
+          @es.onopen = lambda do |event|
+            @body.each {|c| @es.send(c)}
+          end
         end
       end
     end
