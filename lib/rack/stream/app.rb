@@ -24,13 +24,13 @@ module Rack
       def call(env)
         @env = env
         @env['rack.stream'] = self
+        @handler = Handlers.find(self)
 
         EM.synchrony do
           app_status, app_headers, app_body = @app.call(@env)
 
           @status  = app_status
           @headers = app_headers
-          @handler = Handlers.find(self)
 
           # apply before_chunk to any response bodies
           @callbacks[:after_open].unshift(lambda {chunk(*app_body)})
@@ -56,7 +56,7 @@ module Rack
       end
 
       def chunk(*chunks)
-        require_state :open
+        require_state :new, :open
         run_callbacks(:chunk, chunks) {|mutated_chunks|
           @handler.chunk(*mutated_chunks)
         }
@@ -97,9 +97,9 @@ module Rack
       def open! #(server)
         raise UnsupportedServerError.new "missing async.callback. run within thin or rainbows" unless @env['async.callback']
         run_callbacks(:open) {
+          @handler.open!
           @state = :open
           @headers.freeze
-          @handler.open!
         }
       end
 

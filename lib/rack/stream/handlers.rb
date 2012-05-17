@@ -62,17 +62,13 @@ module Rack
         TERM = "\r\n".freeze
         TAIL = "0#{TERM}#{TERM}".freeze
 
-        def initialize(app)
-          super
-          @app.headers['Transfer-Encoding'] = 'chunked'
-          @app.headers.delete('Content-Length')
-        end
-
         def chunk(*chunks)
           super(*chunks.map {|c| encode_chunk(c)})
         end
 
         def open
+          @app.headers['Transfer-Encoding'] = 'chunked'
+          @app.headers.delete('Content-Length')
           @app.env['async.callback'].call [@app.status, @app.headers, @body]
         end
 

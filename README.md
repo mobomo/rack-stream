@@ -82,7 +82,8 @@ Each state is described below.
 When a request first comes in, rack-stream processes any downstream
 rack apps and uses their status and headers for its response. Any
 downstream response bodies are queued for streaming once the headers
-and status have been sent.
+and status have been sent. Any calls to `#chunk` before a connection
+is opened is queued to be sent after a connection opens.
 
 ```ruby
 use Rack::Stream
@@ -155,7 +156,7 @@ An instance enters the `:errored` state if an illegal action is
 performed in one of the states. Legal actions for the different states
 are:
 
-* **new** - `#status=`, `#headers=`
+* **new** - `#chunk`, `#status=`, `#headers=`
 * **open** - `#chunk`, `#close`
 
 All other actions are considered illegal. Manipulating headers after

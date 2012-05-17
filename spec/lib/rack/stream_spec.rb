@@ -45,6 +45,21 @@ describe Rack::Stream do
     end
   end
 
+  context "queued content" do
+    let(:endpoint) {
+      lambda {|env|
+        env['rack.stream'].instance_eval do
+          chunk "Chunky"
+        end
+        [200, {}, ['']]
+      }
+    }
+
+    it "should allow chunks to be queued outside of callbacks" do
+      last_response.body.should == "6\r\nChunky\r\n0\r\n\r\n"
+    end
+  end
+
   context "basic streaming" do
     let(:endpoint) {
       lambda {|env|
