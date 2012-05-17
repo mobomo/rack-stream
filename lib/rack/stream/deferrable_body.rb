@@ -29,9 +29,12 @@ module Rack
 
       def close!(flush = true)
         EM.next_tick {
-          succeed if !flush
-          succeed if flush && empty?
-          schedule_dequeue if flush && !empty?
+          if !flush || empty?
+            succeed
+          else
+            schedule_dequeue
+            close!(flush)
+          end
         }
       end
 
