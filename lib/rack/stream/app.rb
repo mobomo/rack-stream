@@ -28,13 +28,13 @@ module Rack
 
         EM.synchrony do
           @status, @headers, app_body = @app.call(@env)
+
           chunk(*app_body) # chunk any downstream response bodies
+          after_open {close} if @callbacks[:after_open].empty?
+
+          EM.next_tick {open!}
+          ASYNC_RESPONSE
         end
-
-        after_open {close} if @callbacks[:after_open].empty?
-
-        EM.next_tick {open!}
-        ASYNC_RESPONSE
       end
 
       def status=(code)
