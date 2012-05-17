@@ -1,4 +1,5 @@
 require 'eventmachine'
+require 'em-synchrony'
 require 'faye/websocket'
 
 require 'rack/stream/handlers'

@@ -25,22 +25,24 @@ module Rack
         @env = env
         @env['rack.stream'] = self
 
-        app_status, app_headers, app_body = @app.call(@env)
+        EM.synchrony do
+          app_status, app_headers, app_body = @app.call(@env)
 
-        @status  = app_status
-        @headers = app_headers
-        @handler = Handlers.find(self)
+          @status  = app_status
+          @headers = app_headers
+          @handler = Handlers.find(self)
 
-        # apply before_chunk to any response bodies
-        @callbacks[:after_open].unshift(lambda {chunk(*app_body)})
+          # apply before_chunk to any response bodies
+          @callbacks[:after_open].unshift(lambda {chunk(*app_body)})
 
-        # By default, close a connection if no :after_open is specified
-        after_open {close} if @callbacks[:after_open].size == 1
+          # By default, close a connection if no :after_open is specified
+          after_open {close} if @callbacks[:after_open].size == 1
 
-        EM.next_tick {
-          open!
-        }
-        ASYNC_RESPONSE
+          EM.next_tick {
+            open!
+          }
+          ASYNC_RESPONSE
+        end
       end
 
       def status=(code)
@@ -123,11 +125,13 @@ module Rack
       define_callbacks :close, :before, :after
 
       def run_callbacks(name, *args)
-        modified = @callbacks["before_#{name}".to_sym].inject(args) do |memo, cb|
-          [cb.call(*memo)]
+        EM.synchrony do
+          modified = @callbacks["before_#{name}".to_sym].inject(args) do |memo, cb|
+            [cb.call(*memo)]
+          end
+          yield(*modified) if block_given?
+          @callbacks["after_#{name}".to_sym].each {|cb| cb.call(*args)}
         end
-        yield(*modified) if block_given?
-        @callbacks["after_#{name}".to_sym].each {|cb| cb.call(*args)}
       rescue StateConstraintError => e
         error!(e)
       end
