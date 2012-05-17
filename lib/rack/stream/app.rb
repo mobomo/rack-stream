@@ -27,20 +27,12 @@ module Rack
         @handler = Handlers.find(self)
 
         EM.synchrony do
-          app_status, app_headers, app_body = @app.call(@env)
+          @status, @headers, app_body = @app.call(@env)
 
-          @status  = app_status
-          @headers = app_headers
+          chunk(*app_body) # chunk any downstream response bodies
+          after_open {close} if @callbacks[:after_open].empty?
 
-          # apply before_chunk to any response bodies
-          @callbacks[:after_open].unshift(lambda {chunk(*app_body)})
-
-          # By default, close a connection if no :after_open is specified
-          after_open {close} if @callbacks[:after_open].size == 1
-
-          EM.next_tick {
-            open!
-          }
+          EM.next_tick {open!}
           ASYNC_RESPONSE
         end
       end
