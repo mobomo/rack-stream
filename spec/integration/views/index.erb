@@ -8,28 +8,26 @@
   <h2>EventSource</h2>
   <ul id='es'></ul>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   <script type='text/javascript'>
     var socket, source;
 
-    function ws(m) {
-      $('<li>').text(m).appendTo('#ws');
+    function log(id, message) {
+      var li = document.createElement('li');
+      li.textContent = message;
+      document.getElementById(id).appendChild(li);
     }
 
-    function es(m) {
-      $('<li>').text(m).appendTo('#es');
-    }
+    function ws(m) {log('ws', m)}
+    function es(m) {log('es', m)}
 
-    $(function() {
-      socket = new WebSocket("ws://localhost:8888/");
-      socket.onopen    = function()  {ws('socket opened');}
-      socket.onmessage = function(m) {ws(m.data);}
-      socket.onclose   = function()  {ws('socket closed');}
+    socket = new WebSocket("ws://localhost:8888/");
+    socket.onopen    = function()  {ws('socket opened');}
+    socket.onmessage = function(m) {ws(m.data);}
+    socket.onclose   = function()  {ws('socket closed');}
 
-      source = new EventSource('http://localhost:8888/');
-      source.addEventListener('message', function(e) {
-        es(e.data);
-      });
+    source = new EventSource('http://localhost:8888/');
+    source.addEventListener('message', function(e) {
+      es(e.data);
     });
   </script>
 </body>
