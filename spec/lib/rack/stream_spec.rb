@@ -48,15 +48,36 @@ describe Rack::Stream do
   context "queued content" do
     let(:endpoint) {
       lambda {|env|
-        env['rack.stream'].instance_eval do
-          chunk "Chunky"
-        end
+        env['rack.stream'].chunk "Chunky"
         [200, {}, ['']]
       }
     }
 
     it "should allow chunks to be queued outside of callbacks" do
       last_response.body.should == "6\r\nChunky\r\n0\r\n\r\n"
+    end
+  end
+
+  context "synchrony" do
+    let(:endpoint) {
+      lambda {|env|
+        f = Fiber.current
+        EM.next_tick do
+          f.resume [200, {}, ["Chunky"]]
+        end
+
+        env['rack.stream'].instance_eval do
+          after_open do
+            chunk "Monkey"
+            close
+          end
+        end
+        Fiber.yield
+      }
+    }
+
+    it "should wrap evaluation in a fiber" do
+      last_response.body.should == "6\r\nChunky\r\n6\r\nMonkey\r\n0\r\n\r\n"
     end
   end
 

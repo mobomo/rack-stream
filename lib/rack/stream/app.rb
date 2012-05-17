@@ -26,15 +26,8 @@ module Rack
         @env['rack.stream'] = self
         @handler = Handlers.find(self)
 
-        EM.synchrony do
-          @status, @headers, app_body = @app.call(@env)
-
-          chunk(*app_body) # chunk any downstream response bodies
-          after_open {close} if @callbacks[:after_open].empty?
-
-          EM.next_tick {open!}
-          ASYNC_RESPONSE
-        end
+        EM.next_tick {open!}
+        ASYNC_RESPONSE
       end
 
       def status=(code)
@@ -86,9 +79,14 @@ module Rack
       # Transition state from :new to :open
       #
       # Freezes headers to prevent further modification
-      def open! #(server)
+      def open!
         raise UnsupportedServerError.new "missing async.callback. run within thin or rainbows" unless @env['async.callback']
         run_callbacks(:open) {
+          @status, @headers, app_body = @app.call(@env)
+
+          chunk(*app_body) # chunk any downstream response bodies
+          after_open {close} if @callbacks[:after_open].empty?
+
           @handler.open!
           @state = :open
           @headers.freeze
