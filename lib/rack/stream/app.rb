@@ -61,6 +61,11 @@ module Rack
         }
       end
 
+      # @return [String] name of the handler for this request
+      def stream_transport
+        @handler and @handler.class.name.split('::').last
+      end
+
       def new?;     @state == :new     end
       def open?;    @state == :open    end
       def closed?;  @state == :closed  end

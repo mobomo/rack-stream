@@ -158,4 +158,14 @@ describe Rack::Stream do
       $after_close_called = nil
     end
   end
+
+  context "stream transport" do
+    let(:endpoint) {
+      lambda {|env| [200, {}, [env['rack.stream'].stream_transport]]}
+    }
+
+    it "should be http by default" do
+      last_response.body.should == "4\r\nHttp\r\n0\r\n\r\n"
+    end
+  end
 end
