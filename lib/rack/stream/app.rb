@@ -89,6 +89,14 @@ module Rack
         run_callbacks(:open) {
           @status, @headers, app_body = @app.call(@env)
 
+          app_body = if app_body.respond_to?(:body_parts)
+            app_body.body_parts
+          elsif app_body.respond_to?(:body)
+            app_body.body
+          else
+            app_body
+          end
+
           chunk(*app_body) # chunk any downstream response bodies
           after_open {close} if @callbacks[:after_open].empty?
 
