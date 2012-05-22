@@ -58,7 +58,8 @@ To run the example:
 ```
 
 This same endpoint can be accessed via WebSockets or EventSource, see
-'Multi-Protocol Support' below.
+'Multi-Protocol Support' below. Full examples can be found in the `examples`
+directory.
 
 ## Connection Lifecycle
 
@@ -265,7 +266,7 @@ source.addEventListener('message', function(e) {
 * 1.9.3
 
 If a runtime is not listed above, it may still work. It just means I
-haven't tried it yet.
+haven't tried it yet. The only app server I've tried running is Thin.
 
 ## Roadmap
 
