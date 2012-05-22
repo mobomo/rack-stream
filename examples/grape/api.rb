@@ -4,7 +4,7 @@ require 'redis'
 require 'redis/connection/synchrony'
 
 class API < Grape::API
-  default_format :json
+  default_format :txt
 
   helpers do
     include Rack::Stream::DSL
@@ -14,11 +14,10 @@ class API < Grape::API
     end
 
     def build_message(text)
-      m = {:text => text, :stream_transport => stream_transport}.to_json
-      redis.rpush 'messages', m
+      redis.rpush 'messages', text
       redis.ltrim 'messages', 0, 50
-      redis.publish 'messages', m
-      m
+      redis.publish 'messages', text
+      text
     end
   end
 
@@ -35,7 +34,8 @@ class API < Grape::API
 
       status 200
       header 'Content-Type', 'application/json'
-      redis.lrange 'messages', 0, 50
+      chunk *redis.lrange('messages', 0, 50)
+      ""
     end
 
     post do
