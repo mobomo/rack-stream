@@ -273,6 +273,8 @@ haven't tried it yet. The only app server I've tried running is Thin.
 * more protocols / custom protocols http://en.wikipedia.org/wiki/HTTP_Streaming
 * integrate into [grape](http://github.com/intridea/grape)
 * add sinatra example that serves page that uses JS to connect
+* deployment guide
+* better integration with rails
 
 ## Further Reading
 
