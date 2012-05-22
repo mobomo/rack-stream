@@ -1,0 +1,34 @@
+<div class="messages">
+  <%= form_tag('/messages', :method => :post, :remote => true, :class => 'form') do %>
+    <div class='input-append'>
+      <%= text_field_tag :text, nil, :class => 'xlarge span8', :placeholder => "Type your message here..." %>
+      <%= submit_tag 'Send', :class => 'btn btn-primary span2' %>
+    </div>
+  <% end %>
+
+  <hr/>
+
+  <ul>
+    <!-- inserted via js -->
+  </ul>
+
+  <%= javascript_tag do %>
+    $(function() {
+      // clear form input after submit
+      $('form').bind('ajax:beforeSend', function() {
+        $('input#text').val('');
+      });
+
+      function message(m) {
+        $('<li>').text(m).appendTo('.messages ul');
+      }
+
+      var socket = new WebSocket('ws://<%= request.host %>:<%= request.port %>/messages');
+      socket.onopen    = function()  {message('Connection opened');}
+      socket.onclose   = function()  {message('Connection closed');}
+      socket.onmessage = function(m) {
+        message(m.data);
+      }
+    });
+  <% end %>
+</div>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <div class="container">
+    <div class="hero-unit">
+      <h1>Rack::Stream Chat</h1>
+      <p>
+        This is a basic chat demo of using
+        <%= link_to 'Rack::Stream', 'https://github.com/jch/rack-stream' %>
+        with Rails. The web interface uses WebSockets to communicate with
+        the backend, but the same backend also responds to curl. To try it,
+        run:
+      </p>
+      <pre>
+        curl -d text="hello all" <%= request.base_url %>/messages
+      </pre>
+    </div>
+    <%= yield %>
+  </div>
+</body>
+</html>
