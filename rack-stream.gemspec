@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'faye-websocket'
   s.add_runtime_dependency 'em-synchrony'
 
-  s.files         = `git ls-files`.split("\n")
+  s.files         = `git ls-files`.split("\n").select {|f| f !~ /^example/}
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
