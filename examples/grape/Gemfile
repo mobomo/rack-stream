@@ -1,0 +1,8 @@
+source 'http://rubygems.org'
+
+gem 'grape', :git => 'https://github.com/intridea/grape', :branch => 'frontier'
+gem 'thin'
+gem 'rack-stream', :path => File.expand_path('../../../', __FILE__)
+
+gem 'redis'
+gem 'hiredis'
