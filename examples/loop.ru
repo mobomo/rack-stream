@@ -11,10 +11,18 @@ run lambda {|env|
           timer.cancel
           close
         end
-        chunk "Chunky\n"
+        chunk "\nChunky"
         count += 1
       end
     end
+
+    before_chunk do |chunks|
+      chunks.map(&:upcase)
+    end
+
+    before_close do
+      chunk "\nBye"
+    end
   end
-  [200, {}, []]
+  [200, {}, ['Hello']]
 }
