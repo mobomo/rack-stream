@@ -7,23 +7,36 @@ end
 module Rack
   class Stream
     module Handlers
-      # Handler for [Faye](http://faye.jcoglan.com/)
+      # Handler for [Faye](http://faye.jcoglan.com/). This handler
+      # assumes that you have subscribed the the stream you're interested
+      # in ahead of time, and will start streaming to the channel
+      # specified by the request header X-FAYE-STREAM. You may also
+      # optionally specify a request header X-FAYE-CLOSE to be notified
+      # when the connection is closed. Otherwise, the close channel name
+      # is the same as X-FAYE-STREAM with '/close' appended to it.
       #
-      # @example
+      # ## Example
+      # ```ruby
       # require 'rack/stream/handlers/faye'
+      #
+      # # subscribe to channel before we start streaming
       # client = Faye::Client.new('http://localhost:9292/faye')
       # subscription = client.subscribe('/stream') do |message|
-      #   # subscribe to stream before opening connection
+      #   # do stuff with streamed message
       # end
       #
+      # # get notification of when stream is done
       # client.subscribe('/stream/close') do |message|
       #   subscription.cancel  # cancel subscription after stream is closed
       # end
       #
       # use Rack::Stream
+      # ```
       #
+      # ```sh
+      # # closes immediately, name stream channel with X-FAYE-STREAM header
       # curl -H"X-FAYE-STREAM: /stream" -i -N http://localhost:9292/
-      # 200 closes immediately, assumes you subscribed to /stream before hand
+      # ```
       class Faye < AbstractHandler
         def self.accepts?(app)
           app.env['HTTP_X_FAYE_STREAM']
