@@ -2,7 +2,7 @@ require 'forwardable'
 
 module Rack
   class Stream
-    # DSL to access Rack::Stream::App methods
+    # DSL to access Rack::Stream::App methods.
     #
     # ## Example
     # ```ruby
@@ -23,15 +23,35 @@ module Rack
     #
     # run App.new
     # ```
+    #
+    # ## Rack Frameworks
+    #
+    # If you mix this module into a class that already responds to `#call`,
+    # then you need to make `env` available so that methods can be delegated to
+    # `env['rack.stream']`. There is no need to declare a `stream` block in this case.
+    #
+    # For example, Sinatra makes `env` available to its endpoints:
+    #
+    # ```ruby
+    # class App < Sinatra::Base
+    #   include Rack::Stream::DSL
+    #
+    #   get '/' do
+    #     chunk "Hello"  # no need to declare stream block b/c `env` is available
+    #   end
+    # end
+    # ```
     module DSL
       def self.included(base)
         base.extend ClassMethods
         base.extend Forwardable
 
         base.class_eval do
-          include InstanceMethods
+          unless base.respond_to? :call
+            include InstanceMethods
+            attr_reader :env
+          end
 
-          attr_reader :env
           def_delegators :"env['rack.stream']", :after_open, :before_chunk, :chunk, :after_chunk, :before_close, :close, :after_close, :stream_transport
         end
       end
