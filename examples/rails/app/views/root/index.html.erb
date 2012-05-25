@@ -1,5 +1,5 @@
 <div class="messages">
-  <%= form_tag('/messages', :method => :post, :remote => true, :class => 'form') do %>
+  <%= form_tag('/messages', :method => :post, :class => 'form') do %>
     <div class='input-append'>
       <%= text_field_tag :text, nil, :class => 'xlarge span8', :placeholder => "Type your message here..." %>
       <%= submit_tag 'Send', :class => 'btn btn-primary span2' %>
@@ -12,23 +12,41 @@
     <!-- inserted via js -->
   </ul>
 
+  <%= javascript_include_tag '/faye/client.js' %>
   <%= javascript_tag do %>
     $(function() {
-      // clear form input after submit
-      $('form').bind('ajax:beforeSend', function() {
+      $('form').submit(function() {
+        // submit form as POST to /messages
+        $.ajax({
+          url: '/messages',
+          type: 'POST',
+          data: $(this).serialize()
+        })
+
+        // clear form input after submit
         $('input#text').val('');
+
+        return false;
       });
 
-      function message(m) {
-        $('<li>').text(m).appendTo('.messages ul');
-      }
+      // subscribe to /stream stream
+      var client = new Faye.Client('<%= request.url %>faye');
+      var subscription = client.subscribe('/stream', function(message) {
+        console.log("got " + message);
+        $('<li>').text(message).prependTo('.messages ul');
+      });
 
-      var socket = new WebSocket('ws://<%= request.host %>:<%= request.port %>/messages');
-      socket.onopen    = function()  {message('Connection opened');}
-      socket.onclose   = function()  {message('Connection closed');}
-      socket.onmessage = function(m) {
-        message(m.data);
-      }
+      // start streaming to /stream
+      subscription.callback(function() {
+        $.ajax({
+          url: '/messages',
+          type: 'GET',
+          headers: {
+            'X-FAYE-STREAM': '/stream'
+          }
+        });
+      });
+
     });
   <% end %>
 </div>

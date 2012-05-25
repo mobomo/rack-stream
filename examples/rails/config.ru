@@ -4,6 +4,9 @@ require ::File.expand_path('../config/environment',  __FILE__)
 
 require ::File.expand_path '../../grape/api', __FILE__
 
+require 'rack/stream/handlers/faye'
+use Faye::RackAdapter, :mount => '/faye'
+
 map '/' do
   run Chat::Application
 end

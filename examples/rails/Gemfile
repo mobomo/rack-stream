@@ -7,11 +7,13 @@ gem "twitter-bootstrap-rails"
 gem 'grape', :git => 'https://github.com/intridea/grape', :branch => 'frontier'
 gem 'redis'
 gem 'hiredis'
-gem 'rack-stream', :path => File.expand_path('../../..', __FILE__)
+gem 'rack-stream', :git => 'https://github.com/intridea/rack-stream'
 gem 'thin'
+gem 'faye'
 
-
-gem 'debugger'
+group :development, :test do
+  gem 'debugger'
+end
 
 # Gems used only for assets and not required
 # in production environments by default.
