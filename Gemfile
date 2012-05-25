@@ -23,7 +23,6 @@ group :development, :test do
   gem 'em-eventsource'
   gem 'em-http-request'
   gem 'sinatra'
-  gem 'faye'
 end
 
 # debugger for 1.9 only

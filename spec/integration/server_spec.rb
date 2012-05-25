@@ -10,7 +10,6 @@ if ENV['SERVER']
   require 'em-eventsource'
   require 'capybara'
   require 'capybara-webkit'
-  require 'faye'
 
   describe 'Integration', :integration => true, :type => :request, :driver => :webkit do
     EXPECTED = 'HELLO WORLDCHUNKYMONKEYBROWNIEBATTERCLOSING'.freeze
@@ -73,8 +72,6 @@ if ENV['SERVER']
         all('#ws li').map(&:text).should =~ ["socket opened", "HELLO", "", "WORLD", "CHUNKY", "MONKEY", "BROWNIE", "BATTER", "CLOSING", "socket closed"]
 
         all('#es li').map(&:text).should =~ ["HELLO", "", "WORLD", "CHUNKY", "MONKEY", "BROWNIE", "BATTER", "CLOSING"]
-
-        all('#faye li').map(&:text).should =~ ["HELLO", "", "WORLD", "CHUNKY", "MONKEY", "BROWNIE", "BATTER", "CLOSING", "stream unsubscribed"]
       end
     end
   end

@@ -2,8 +2,6 @@
 <head></head>
 <body>
   <h1>Rack::Stream Sinatra Example</h1>
-  <h2>Faye</h2>
-  <ul id='faye'></ul>
 
   <h2>Websocket</h2>
   <ul id='ws'></ul>
@@ -12,7 +10,6 @@
   <ul id='es'></ul>
 
   <script type='text/javascript' src='/jquery-1.7.2.min.js'></script>
-  <script type='text/javascript' src='/faye.js'></script>
   <script type='text/javascript'>
     $(function() {
       var socket, source, faye;
@@ -33,23 +30,6 @@
       source = new EventSource('http://localhost:8888/');
       source.addEventListener('message', function(e) {
         es(e.data);
-      });
-
-      faye = new Faye.Client('http://localhost:8888/faye');
-      var subscription = faye.subscribe('/stream', function(message) {
-        f(message);
-      });
-      faye.subscribe('/stream/close', function(message) {
-        subscription.cancel();
-        f("stream unsubscribed");
-      });
-      subscription.callback(function() {
-        $.ajax({
-          url: '/',
-          headers: {
-            'X-FAYE-STREAM': '/stream'
-          }
-        });
       });
     })
   </script>
