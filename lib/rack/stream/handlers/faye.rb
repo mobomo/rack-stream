@@ -45,8 +45,61 @@ module Rack
           app.env['HTTP_X_FAYE_STREAM']
         end
 
+        def initialize(app)
+          super
+
+          # channels
+          client.subscribe '/rack/stream/faye/open' do |channel|
+
+          end
+        end
+
+        # If multiple requests come in for the same stream_channel,
+        # only one should publish chunks.
+        #
+        # what if the auth is different though?
+        #
+        # current_user.messages.added do |message|
+        #   chunk message  # this is unique to request and should not be broadcast to everyone
+        # end
+        # def chunk(*chunks)
+        #   super(*chunks) unless streaming?
+        # end
+
+
+        # could require that all X-FAYE-STREAM be generated uuid
+        # X-RACK-STREAM: faye
+        # js: get '/messages', x-rack-stream: faye
+        # rb:   return faye stream_channel
+        # js: faye.subscribe stream_channel
+        #
+        # very wasteful: every faye channel only serves 1 client :(
+        # "correct" way is to support multiple protocols. pubsub is not a
+        # protocol, so we're shoehorning it in.
+        #
+        # potentially support pub/sub in rack-stream:
+        #
+        # chunk message, :channel => '/rooms/5'
+        # chunk message, :channel => '/global'
+        #
+        # ... 1 request to many responses. broadcast capability
+        # ... not all handlers can support it
+        # ... maybe it's ok b/c it'll be an optimization?
+        # if #chunk supports options, then app #run_callbacks needs
+        # to be rewritten
+        def chunk(*args)
+          options = args.pop if args.last.is_a? Hash
+          channel = options[:channel] || stream_channel
+          args.each do |a|
+            client.publish channel, a
+          end
+        end
+
         def open
           @body.each do |c|
+            # TODO: this can't be in open
+            # publishes out to ALL clients
+            # each time you open a connection, a client subscribes
             client.publish(stream_channel, c)
           end
 
@@ -57,6 +110,7 @@ module Rack
 
         def close
           @body.callback {
+            # TODO: this also broadcasts, bad.
             client.publish close_channel, TERM
           }
         end
@@ -73,6 +127,10 @@ module Rack
 
         def close_channel
           @app.env['HTTP_X_FAYE_CLOSE'] || "#{stream_channel}/close"
+        end
+
+        def streaming?
+
         end
       end
     end
