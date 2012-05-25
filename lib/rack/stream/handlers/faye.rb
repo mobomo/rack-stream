@@ -17,6 +17,7 @@ module Rack
       #
       # ## Example
       # ```ruby
+      # require 'faye'
       # require 'rack/stream/handlers/faye'
       #
       # # subscribe to channel before we start streaming
