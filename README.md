@@ -4,6 +4,17 @@
 
 rack-stream is middleware for building multi-protocol streaming rack endpoints.
 
+## Installation
+
+```ruby
+# Gemfile
+gem 'rack-stream'
+```
+
+```sh
+bundle
+```
+
 ## Example
 
 ```ruby
@@ -13,10 +24,10 @@ require 'rack/stream'
 class App
   include Rack::Stream::DSL
 
-  def call(env)
+  stream do
     after_open do
       count = 0
-      EM.add_periodic_timer(1) do
+      @timer = EM.add_periodic_timer(1) do
         if count != 3
           chunk "chunky #{count}\n"
           count += 1
@@ -29,17 +40,20 @@ class App
     end
 
     before_close do
+      @timer.cancel
       chunk "monkey!\n"
     end
 
-    [200, {'Content-Type' => 'application/json'}, []]
+    [200, {'Content-Type' => 'text/plain'}, []]
   end
 end
 
-Rack::Builder.app do
+app = Rack::Builder.app do
   use Rack::Stream
-  run App
+  run App.new
 end
+
+run app
 ```
 
 To run the example:
@@ -282,6 +296,7 @@ haven't tried it yet. The only app server I've tried running is Thin.
 
 ## Further Reading
 
+* [API Reference](http://rubydoc.info/gems/rack-stream)
 * [Stream Updates With Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)
 * [thin_async](https://github.com/macournoyer/thin_async) was where I got started
 * [thin-async-test](https://github.com/phiggins/thin-async-test) used to simulate thin in tests

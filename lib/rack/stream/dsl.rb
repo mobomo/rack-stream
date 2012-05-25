@@ -2,15 +2,67 @@ require 'forwardable'
 
 module Rack
   class Stream
+    # DSL to access Rack::Stream::App methods
+    #
+    # ## Example
+    # ```ruby
+    # # config.ru
+    # class App
+    #   include Rack::Stream::DSL
+    #
+    #   # declare your rack endpoint with a block
+    #   stream do
+    #     # all `Rack::Stream::App` methods, and `env` are available to you
+    #     chunk "Hello"
+    #     before_close { chunk "Bye" }
+    #
+    #     # return a rack response
+    #     [200, {'Content-Type' => 'text/plain'}, []]
+    #   end
+    # end
+    #
+    # run App.new
+    # ```
     module DSL
       def self.included(base)
-        base.class_eval do
-          extend Forwardable
-          def_delegators :rack_stream, :after_open, :before_chunk, :chunk, :after_chunk, :before_close, :close, :after_close, :stream_transport
+        base.extend ClassMethods
+        base.extend Forwardable
 
-          def rack_stream
-            env['rack.stream']
+        base.class_eval do
+          include InstanceMethods
+
+          attr_reader :env
+          def_delegators :"env['rack.stream']", :after_open, :before_chunk, :chunk, :after_chunk, :before_close, :close, :after_close, :stream_transport
+        end
+      end
+
+      module InstanceMethods
+        # Rack #call method is defined on the instance.
+        #
+        # @raise StreamBlockNotDefined if `.stream` isn't called before
+        #   the first request.
+        def call(env)
+          @env = env
+          unless self.class._rack_stream_proc
+            raise StreamBlockNotDefined.new
           end
+          instance_eval &self.class._rack_stream_proc
+        end
+      end
+
+      module ClassMethods
+        # @private
+        attr_reader :_rack_stream_proc
+
+        # Declare your rack endpoint with `&blk`
+        def stream(&blk)
+          @_rack_stream_proc = blk
+        end
+      end
+
+      class StreamBlockNotDefined < StandardError
+        def initialize(message = nil)
+          super("no stream block declared")
         end
       end
     end
