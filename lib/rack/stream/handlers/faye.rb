@@ -24,7 +24,7 @@ module Rack
       #
       # curl -H"X-FAYE-STREAM: /stream" -i -N http://localhost:9292/
       # 200 closes immediately, assumes you subscribed to /stream before hand
-      class FayeHandler < AbstractHandler
+      class Faye < AbstractHandler
         def self.accepts?(app)
           app.env['HTTP_X_FAYE_STREAM']
         end

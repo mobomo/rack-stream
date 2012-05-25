@@ -276,6 +276,10 @@ haven't tried it yet. The only app server I've tried running is Thin.
 * deployment guide
 * better integration with rails
 
+* body: don't enqueue more chunks if state is succeeded?
+* performance: GC, cleanup references, profile
+
+
 ## Further Reading
 
 * [Stream Updates With Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)

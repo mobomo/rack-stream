@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'rack/stream'
 require 'faye'
+require 'rack/stream/handlers/faye'
 
 use Faye::RackAdapter, :mount => '/faye', :timeout => 5
 use Rack::Stream

@@ -4,7 +4,7 @@ module Rack
       # This handler uses delegates WebSocket requests to faye-websocket
       class WebSocket < AbstractHandler
         def self.accepts?(app)
-          Faye::WebSocket.websocket?(app.env)
+          ::Faye::WebSocket.websocket?(app.env)
         end
 
         def close
@@ -14,7 +14,7 @@ module Rack
         end
 
         def open
-          @ws = Faye::WebSocket.new(@app.env)
+          @ws = ::Faye::WebSocket.new(@app.env)
           @ws.onopen = lambda do |event|
             @body.each {|c| @ws.send(c)}
           end
