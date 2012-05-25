@@ -38,6 +38,8 @@ module Rack
       # curl -H"X-FAYE-STREAM: /stream" -i -N http://localhost:9292/
       # ```
       class Faye < AbstractHandler
+        TERM ||= '_FAYE_CHANNEL_CLOSE_'.freeze
+
         def self.accepts?(app)
           app.env['HTTP_X_FAYE_STREAM']
         end
@@ -54,7 +56,7 @@ module Rack
 
         def close
           @body.callback {
-            client.publish close_channel, '_FAYE_CHANNEL_CLOSE_'
+            client.publish close_channel, TERM
           }
         end
 
