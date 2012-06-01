@@ -58,6 +58,25 @@ describe Rack::Stream do
     end
   end
 
+  context "custom response body" do
+    let(:endpoint) {
+      lambda {|env|
+        response_klass = Class.new {
+          def each
+            %w(Chunky Monkey).each do |body|
+              yield body
+            end
+          end
+        }
+        [200, {}, response_klass.new]
+      }
+    }
+
+    it 'should chunk downstream custom response bodies' do
+      last_response.body.should == "6\r\nChunky\r\n6\r\nMonkey\r\n0\r\n\r\n"
+    end
+  end
+
   context "synchrony" do
     let(:endpoint) {
       lambda {|env|
