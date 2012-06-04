@@ -178,7 +178,7 @@ All other actions are considered illegal. Manipulating headers after
 `:new` is also illegal. The connection is closed immediately, and the
 error is written to `env['rack.error']`
 
-## Manipuating Content
+## Manipulating Content
 
 When a connection is open and streaming content, you can define
 `:before_chunk` callbacks to manipulate the content before it's sent
@@ -228,7 +228,7 @@ require 'eventmachine'
 require 'faye/websocket'
 
 EM.run {
-  socket = Faye::WebSocket::Client.new('ws://localhost:3000/)
+  socket = Faye::WebSocket::Client.new('ws://localhost:3000/')
   socket.onmessage = lambda {|e| puts e.data}  # puts each streamed chunk
   socket.onclose   = lambda {|e| EM.stop}
 }
