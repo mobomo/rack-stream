@@ -47,7 +47,7 @@ module Rack
 
         # @private
         def open!
-          @app.headers.delete('Content-Length')
+          @app.headers = @app.headers.select { |key| key != 'Content-Length' }
           open
         end
 
