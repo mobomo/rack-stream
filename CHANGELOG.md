@@ -1,5 +1,9 @@
 # Changelog
 
+## next version
+
+* `after_connection_error` callback, to notify application when request was lost or has been cancelled by the client
+
 ## 0.0.5
 
 * fix downstream custom response bodies

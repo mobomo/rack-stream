@@ -39,6 +39,11 @@ class App
       end
     end
 
+    after_connection_error do
+      # connection has been lost / terminated by the client, close all resources
+      @timer.cancel if @timer
+    end
+
     before_close do
       @timer.cancel
       chunk "monkey!\n"

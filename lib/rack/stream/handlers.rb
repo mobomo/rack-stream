@@ -35,6 +35,7 @@ module Rack
         def initialize(app)
           @app  = app
           @body = DeferrableBody.new
+          @body.errback { @app.report_connection_error }
         end
 
         # Enqueue content to be streamed at a later time.

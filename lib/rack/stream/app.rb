@@ -67,6 +67,11 @@ module Rack
       def closed?;  @state == :closed  end
       def errored?; @state == :errored end
 
+      def report_connection_error
+        # notify callbacks about the connection error
+        run_callbacks(:connection_error)
+      end
+
       private
       ASYNC_RESPONSE = [-1, {}, []].freeze
 
@@ -119,6 +124,7 @@ module Rack
       define_callbacks :open,  :after
       define_callbacks :chunk, :before, :after
       define_callbacks :close, :before, :after
+      define_callbacks :connection_error, :after
 
       def run_callbacks(name, *args)
         EM.synchrony do

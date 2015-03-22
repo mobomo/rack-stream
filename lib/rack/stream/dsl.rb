@@ -52,7 +52,7 @@ module Rack
             attr_reader :env
           end
 
-          def_delegators :"env['rack.stream']", :after_open, :before_chunk, :chunk, :after_chunk, :before_close, :close, :after_close, :stream_transport
+          def_delegators :"env['rack.stream']", :after_open, :before_chunk, :chunk, :after_chunk, :before_close, :close, :after_close, :stream_transport, :after_connection_error
         end
       end
 
