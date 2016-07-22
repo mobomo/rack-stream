@@ -2,7 +2,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "rack-stream"
-  s.version     = "0.0.5"
+  s.version     = "0.0.6"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Jerry Cheung"]
   s.email       = ["jerry@intridea.com"]
@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{Rack middleware for building multi-protocol streaming rack endpoints}
   s.description = %q{Rack middleware for building multi-protocol streaming rack endpoints}
   s.license     = "BSD"
+  s.required_ruby_version = '>= 1.9.3'
 
   s.rubyforge_project = "rack-stream"
 
